@@ -36,16 +36,22 @@ Author:
     warelock (2024-06-15)
 """
 
+import os
+import logging
 import json
-from datetime import datetime
-
+from datetime import datetime, timezone
 import boto3
-
-# Import all needed Python modules
 import discord
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
+
+AWS_DEFAULT_REGION = os.environ.get("AWS_DEFAULT_REGION")
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 # Set some Google event appearance customizations
 GOOGLE_EVENT_CHANNEL_NAME_PREFIX = "🔉 "
@@ -144,7 +150,9 @@ def create_google_event(discord_event):
         if error.status_code == 409:
             update_google_event(discord_event, discord_event)
     else:
-        print(f"Google Calendar event created for {discord_event.name}")
+#        print(f"Google Calendar event created for {discord_event.name}")
+        logger.info("Google Calendar event created for %s",
+                    discord_event.name)
 
 
 def update_google_event(old_discord_event, new_discord_event):
@@ -200,7 +208,9 @@ def update_google_event(old_discord_event, new_discord_event):
         eventId=str(old_discord_event.id),
         body=google_event_details,
     ).execute()
-    print(f"Google Calendar event updated for {new_discord_event.name}")
+    #print(f"Google Calendar event updated for {new_discord_event.name}")
+    logger.info("Google Calendar event created for %s",
+                new_discord_event.name)
 
 
 @discord_client.event
@@ -227,7 +237,8 @@ async def on_ready():
     messages.
     """
     # Announce ourselves to the console
-    print(f"We have logged in as {discord_client.user}")
+    #print(f"We have logged in as {discord_client.user}")
+    logger.info("We have logged in as %s", discord_client.user)
 
     google_event_summary_prefix = "Discord (" + discord_client.guilds[0].name + "): "
 
@@ -235,7 +246,9 @@ async def on_ready():
     # matching based on event summary field
     discord_guild = discord_client.guilds[0]
     discord_scheduled_events = discord_guild.scheduled_events
-    now = datetime.utcnow().isoformat() + "Z"  # 'Z' indicates UTC time
+
+    # Get the date and time as UTC
+    now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + 'Z'
     google_events_result = (
         google_client.events()
         .list(
@@ -331,7 +344,9 @@ async def on_scheduled_event_delete(discord_event):
     google_client.events().delete(
         calendarId=CALENDAR_ID, eventId=str(discord_event.id)
     ).execute()
-    print(f"Google Calendar event deleted for {discord_event.name}")
+    #print(f"Google Calendar event deleted for {discord_event.name}")
+    logger.info("Google Calendar event deleted for %s",
+                discord_event.name)
 
 
 # Start the Discord bot service

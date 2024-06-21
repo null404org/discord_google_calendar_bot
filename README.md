@@ -20,9 +20,32 @@ Usage:
 2. Run the program on a Linux machine with the required dependencies installed.
 3. The bot will automatically connect to the Discord API and synchronize scheduled events with the Google Calendar.
 
-Dependencies:
-- Python 3.7+
-- discord.py
-- google-api-python-client
-- google-auth
-- boto3
+# Requirements
+
+You need to run this on a Debian-based Linux server, like Ubuntu. If you 
+want to run it as a Docker container, you need to install 
+[Docker Engine (Docker CE)](https://docs.docker.com/engine/install/ubuntu/) first.
+
+# Installation
+
+Clone the bot from this repo and go into the downloaded folder:
+
+```bash
+git clone https://github.com/null404org/discord_google_calendar_bot.git
+cd discord_google_calendar_bot
+```
+
+To run this bot as a systemd service:
+
+```bash
+/bin/bash install_and_start_with_systemd.sh
+```
+
+To run this bot as a Docker container:
+
+```bash
+/bin/bash install_and_start_with_docker.sh
+```
+
+Take notice of the output of the installation scripts, where you will see
+useful bot service management and monitoring commands.
