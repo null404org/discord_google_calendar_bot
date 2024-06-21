@@ -172,7 +172,7 @@ def update_google_event(old_discord_event, new_discord_event):
     The function then uses the Google Calendar API to update the existing
     event in the calendar, using the event ID from the old Discord event.
     Finally, it prints a message to the console indicating that the Google
-    Calendar event has been updated.
+    Calendar event has been updated successfully.
     """
     google_event_summary_prefix = "Discord (" + discord_client.guilds[0].name + "): "
 
