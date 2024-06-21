@@ -28,11 +28,13 @@ want to run it as a Docker container, you need to install
 
 # Installation
 
-Clone the bot from this repo and go into the downloaded folder:
+Clone the bot from this repo, go into the downloaded folder, and run the 
+initial `setup.sh` script:
 
 ```bash
 git clone https://github.com/null404org/discord_google_calendar_bot.git
 cd discord_google_calendar_bot
+/bin/bash setup.sh
 ```
 
 To run this bot as a systemd service:
