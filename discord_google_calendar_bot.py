@@ -36,10 +36,11 @@ Author:
     warelock (2024-06-15)
 """
 
-import os
-import logging
 import json
+import logging
+import os
 from datetime import datetime, timezone
+
 import boto3
 import discord
 from google.oauth2 import service_account
@@ -150,8 +151,7 @@ def create_google_event(discord_event):
         if error.status_code == 409:
             update_google_event(discord_event, discord_event)
     else:
-        logger.info("Google Calendar event created for %s",
-                    discord_event.name)
+        logger.info("Google Calendar event created for %s", discord_event.name)
 
 
 def update_google_event(old_discord_event, new_discord_event):
@@ -207,8 +207,7 @@ def update_google_event(old_discord_event, new_discord_event):
         eventId=str(old_discord_event.id),
         body=google_event_details,
     ).execute()
-    logger.info("Google Calendar event created for %s",
-                new_discord_event.name)
+    logger.info("Google Calendar event created for %s", new_discord_event.name)
 
 
 @discord_client.event
@@ -245,7 +244,7 @@ async def on_ready():
     discord_scheduled_events = discord_guild.scheduled_events
 
     # Get the date and time as UTC
-    now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + 'Z'
+    now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + "Z"
     google_events_result = (
         google_client.events()
         .list(
@@ -341,8 +340,7 @@ async def on_scheduled_event_delete(discord_event):
     google_client.events().delete(
         calendarId=CALENDAR_ID, eventId=str(discord_event.id)
     ).execute()
-    logger.info("Google Calendar event deleted for %s",
-                discord_event.name)
+    logger.info("Google Calendar event deleted for %s", discord_event.name)
 
 
 # Start the Discord bot service
