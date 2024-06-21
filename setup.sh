@@ -2,9 +2,6 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-# Print each command before executing it (useful for debugging)
-set -x
-
 # Specify the Python version
 PYTHON_VERSION=3.12
 
