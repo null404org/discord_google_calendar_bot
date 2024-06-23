@@ -1,0 +1,12 @@
+[Unit]
+Description=Discord Google Calendar Bot
+After=network.target
+
+[Service]
+User=discord_google_calendar_bot
+WorkingDirectory=/opt/discord_google_calendar_bot
+ExecStart=/bin/bash run_discord_google_calendar_bot.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
