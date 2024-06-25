@@ -41,7 +41,7 @@ sudo systemctl start discord-google-calendar-bot
 echo ""
 echo "The bot has been started as a systemd service:"
 echo ""
-sudo systemctl status discord-google-calendar-bot
+SYSTEMD_PAGER=cat systemctl status discord-google-calendar-bot
 echo ""
 echo "Other operational things you can do with the container:"
 echo ""
