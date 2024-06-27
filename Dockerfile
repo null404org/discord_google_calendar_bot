@@ -1,5 +1,12 @@
-# Use Python 3.12 image as the base
-FROM python:3.13.0b1-slim
+# Use Python image as the base
+#
+# NOTE: This needs to stay at 3.12, as 3.13 has dependency issues
+# with wheel
+#
+# "Use of deprecated module audioop"
+# https://github.com/Rapptz/discord.py/issues/9477
+#
+FROM python:3.12
 
 # Set the working directory inside the container
 WORKDIR /app
