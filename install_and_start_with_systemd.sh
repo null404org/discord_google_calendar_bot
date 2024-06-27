@@ -35,7 +35,14 @@ sudo chmod 400 $INSTALL_DIR/discord_google_calendar_bot.py
 sudo chmod 700 $INSTALL_DIR/run_discord_google_calendar_bot.sh
 sudo systemctl daemon-reload
 sudo systemctl enable discord-google-calendar-bot
-sudo systemctl start discord-google-calendar-bot
+
+if systemctl is-active --quiet "discord-google-calendar-bot"; then
+  echo "Restarting service 'discord-google-calendar-bot'"
+  sudo systemctl restart discord-google-calendar-bot
+else
+  echo "Starting service 'discord-google-calendar-bot'"
+  sudo systemctl start discord-google-calendar-bot
+fi
 
 # Print instructions for manipulating the bot
 echo ""
