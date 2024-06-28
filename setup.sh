@@ -24,6 +24,9 @@ install_if_not_exists python$PYTHON_VERSION
 install_if_not_exists python${PYTHON_VERSION}-venv
 install_if_not_exists python3-pip
 
+#
+[ -d .venv ] && rm -rf .venv
+
 # Create a virtual environment using the specified Python version
 python$PYTHON_VERSION -m venv .venv
 
@@ -34,7 +37,7 @@ source .venv/bin/activate
 pip install --upgrade pip
 
 # Install required Python packages from requirements.txt
-pip install -r requirements.txt
+[ -f requirements-dev.txt ] && pip install -r requirements-dev.txt || pip install -r requirements.txt
 
 # Deactivate the virtual environment
 deactivate

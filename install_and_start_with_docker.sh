@@ -2,6 +2,8 @@
 # This script installs the Discord bot as a Docker container. It expects
 # that Docker is installed and configured correctly on the system.
 
+CONTAINER_NAME="discord_google_calendar_bot"
+
 # Verify that Docker is installed
 if [ ! $(command -v docker) ]; then
   echo "Please install Docker first."
@@ -21,28 +23,34 @@ cat ~/.aws/config ~/.aws/credentials | grep = | grep -v output | \
 chmod 600 ~/.aws/docker_env.conf
 
 # Build the Docker image
-docker build -t discord_google_calendar_bot .
+docker build -t $CONTAINER_NAME .
 
 # Start the bot as a Docker container
-docker run --name="discord_google_calendar_bot" \
-  --env-file=$HOME/.aws/docker_env.conf -d discord_google_calendar_bot
+if docker inspect --format '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null | grep -q 'true'; then
+  printf "Restarting existing Docker bot $CONTAINER_NAME: "
+  docker restart $CONTAINER_NAME
+else
+  printf "Starting $CONTAINER_NAME as a Docker container: "
+  docker run --name="$CONTAINER_NAME" \
+    --env-file=$HOME/.aws/docker_env.conf -d $CONTAINER_NAME
+fi
 
 # Print instructions for manipulating the bot
 echo ""
-echo "The bot has been started as a Docker container:"
+echo "The bot is now running as a Docker container: "
 echo ""
-docker ps | grep discord_google_calendar_bot
+docker ps | grep $CONTAINER_NAME
 echo ""
-echo "Other operational things you can do with the container:"
+echo "Other operational things you can do with the bot:"
 echo ""
-echo "docker start discord_google_calendar_bot"
-echo "docker stop discord_google_calendar_bot"
-echo "docker restart discord_google_calendar_bot"
-echo "docker logs discord_google_calendar_bot -f"
+echo "docker start $CONTAINER_NAME"
+echo "docker stop $CONTAINER_NAME"
+echo "docker restart $CONTAINER_NAME"
+echo "docker logs $CONTAINER_NAME -f"
 echo ""
-echo "To stop the bot and remove the docker container and image completely:"
+echo "To stop the bot, removing the docker container and image completely:"
 echo ""
-echo "docker stop discord_google_calendar_bot"
-echo "docker rm discord_google_calendar_bot"
-echo "docker image rm discord_google_calendar_bot"
+echo "docker stop $CONTAINER_NAME"
+echo "docker rm $CONTAINER_NAME"
+echo "docker image rm $CONTAINER_NAME"
 echo ""
