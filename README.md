@@ -32,7 +32,7 @@ Usage:
 
 You need to run this on a Debian-based Linux server, like Ubuntu. If you want to run it as a Docker container, you need to install [Docker Engine (Docker CE)](https://docs.docker.com/engine/install/ubuntu/) first.
 
-# Installation
+# Installation/Upgrade
 
 ## Create a Discord Bot Account
 
@@ -67,13 +67,25 @@ You need to run this on a Debian-based Linux server, like Ubuntu. If you want to
 
 NOTE: Make * sure * you either copy/paste the key names as they are or type them in UPPER CASE
 
-## Bot Deployment
+## Bot Deployment/Upgrade
 
-Clone the bot from this repo, go into the downloaded folder, and run the initial `setup.sh` script:
+If you're doing an initial installation:
 
 ```bash
 git clone https://github.com/null404org/discord_google_calendar_bot.git
 cd discord_google_calendar_bot
+```
+
+If you're doing an upgrade:
+
+```bash
+cd discord_google_calendar_bot
+git pull
+```
+
+Run the initial setup script. This prepares the needed Python virtual environment that allows the bot to use its own Python interpreter and Python dependencies, completely aside from whatever Python stuff you've installed at the user or system level:
+
+```
 /bin/bash setup.sh
 ```
 
