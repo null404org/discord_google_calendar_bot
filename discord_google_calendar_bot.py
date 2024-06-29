@@ -43,9 +43,20 @@ from datetime import datetime, timezone
 
 import boto3
 import discord
+import requests
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+google_day = {
+    0: "MO",
+    1: "TU",
+    2: "WE",
+    3: "TH",
+    4: "FR",
+    5: "SA",
+    6: "SU",
+}
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
@@ -96,6 +107,60 @@ google_credentials = service_account.Credentials.from_service_account_info(
 google_client = build("calendar", "v3", credentials=google_credentials)
 
 
+def get_scheduled_event_recurrence_rule(guild_id, event_id):
+    """
+    Retrieves the recurrence rule of a Discord scheduled event.
+
+    Args:
+        guild_id (str): The ID of the guild where the event is located.
+        event_id (str): The ID of the scheduled event.
+        bot_token (str): The bot token used for authentication.
+
+    Returns:
+        dict: A dictionary containing the frequency and interval of the recurrence rule.
+    """
+    url = f"https://discord.com/api/v10/guilds/{guild_id}/scheduled-events/{event_id}"
+    headers = {
+        "Authorization": f"Bot {DISCORD_TOKEN}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = requests.get(url, headers=headers, timeout=60)
+        response.raise_for_status()
+        # Process the response
+    except requests.exceptions.Timeout:
+        print("The request timed out after 60 seconds.")
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+
+    event_data = response.json()
+
+    if event_data["recurrence_rule"] is not None:
+        frequency = event_data["recurrence_rule"]["frequency"]
+        interval = event_data["recurrence_rule"]["interval"]
+        by_n_weekday_n = None
+        by_n_weekday_day = None
+        by_month = None
+        by_month_day = None
+        if frequency == 1:
+            by_n_weekday_n = event_data["recurrence_rule"]["by_n_weekday"][0]["n"]
+            by_n_weekday_day = event_data["recurrence_rule"]["by_n_weekday"][0]["day"]
+        if frequency == 0:
+            by_month = event_data["recurrence_rule"]["by_month"][0]
+            by_month_day = event_data["recurrence_rule"]["by_month_day"][0]
+        return {
+            "frequency": frequency,
+            "interval": interval,
+            "by_month": by_month,
+            "by_month_day": by_month_day,
+            "by_n_weekday_n": by_n_weekday_n,
+            "by_n_weekday_day": by_n_weekday_day,
+        }
+    else:
+        return None
+
+
 def create_google_event(discord_event):
     """
     Creates a Google Calendar event from a Discord event.
@@ -126,6 +191,30 @@ def create_google_event(discord_event):
         end_time = discord_event.end_time
         location = GOOGLE_EVENT_LOCATION_PREFIX + discord_event.location
 
+    guild_id = discord_event.guild_id
+    event_id = discord_event.id
+    recurrence_rule = get_scheduled_event_recurrence_rule(
+        guild_id, event_id
+    )
+    recurrence = None
+    if recurrence_rule is not None:
+        interval = recurrence_rule["interval"]
+        if recurrence_rule["frequency"] == 3:
+            recurrence = ["RRULE:FREQ=WEEKLY;WKST=MO;BYDAY=MO,TU,WE,TH,FR"]
+        elif recurrence_rule["frequency"] == 2:
+            recurrence = [f"RRULE:FREQ=WEEKLY;INTERVAL={interval}"]
+        elif recurrence_rule["frequency"] == 1:
+            day_str = google_day[recurrence_rule["by_n_weekday_day"]]
+            n_str = str(recurrence_rule["by_n_weekday_n"])
+            recurrence = [f"RRULE:FREQ=MONTHLY;WKST=MO;BYDAY={n_str}{day_str}"]
+        elif recurrence_rule["frequency"] == 0:
+            recurrence = [
+                f"RRULE:FREQ=YEARLY;"
+                f"BYMONTH={recurrence_rule["by_month"]};"
+                f"BYMONTHDAY={recurrence_rule["by_month_day"]}"
+            ]
+
+
     google_event_details = {
         "id": str(discord_event.id),
         "summary": google_event_summary_prefix + discord_event.name,
@@ -139,6 +228,7 @@ def create_google_event(discord_event):
             "dateTime": end_time.isoformat(),
             "timeZone": "UTC",
         },
+        "recurrence": recurrence,
     }
 
     # Create the calendar event based on Discord event ID and announce it to
@@ -185,6 +275,29 @@ def update_google_event(old_discord_event, new_discord_event):
         discord_end_time = new_discord_event.end_time
         discord_location = GOOGLE_EVENT_LOCATION_PREFIX + new_discord_event.location
 
+    guild_id = new_discord_event.guild_id
+    event_id = new_discord_event.id
+    recurrence_rule = get_scheduled_event_recurrence_rule(
+        guild_id, event_id
+    )
+    recurrence = None
+    if recurrence_rule is not None:
+        interval = recurrence_rule["interval"]
+        if recurrence_rule["frequency"] == 3:
+            recurrence = ["RRULE:FREQ=WEEKLY;WKST=MO;BYDAY=MO,TU,WE,TH,FR"]
+        elif recurrence_rule["frequency"] == 2:
+            recurrence = [f"RRULE:FREQ=WEEKLY;INTERVAL={interval}"]
+        elif recurrence_rule["frequency"] == 1:
+            day_str = google_day[recurrence_rule["by_n_weekday_day"]]
+            n_str = str(recurrence_rule["by_n_weekday_n"])
+            recurrence = [f"RRULE:FREQ=MONTHLY;WKST=MO;BYDAY={n_str}{day_str}"]
+        elif recurrence_rule["frequency"] == 0:
+            recurrence = [
+                f"RRULE:FREQ=YEARLY;"
+                f"BYMONTH={recurrence_rule["by_month"]};"
+                f"BYMONTHDAY={recurrence_rule["by_month_day"]}"
+            ]
+
     google_event_details = {
         "id": str(new_discord_event.id),
         "summary": google_event_summary_prefix + new_discord_event.name,
@@ -198,6 +311,7 @@ def update_google_event(old_discord_event, new_discord_event):
             "dateTime": discord_end_time.isoformat(),
             "timeZone": "UTC",
         },
+        "recurrence": recurrence,
     }
 
     # Update the calendar event based on Discord event ID and announce it to

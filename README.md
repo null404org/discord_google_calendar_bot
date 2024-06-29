@@ -95,12 +95,13 @@ Run this bot as a Docker container:
 
 ## Systemd
 
-| Desired effect | Command |
-|---|---|
-| Start the bot | sudo systemctl start discord-google-calendar-bot |
-| Stop the bot | sudo systemctl stop discord-google-calendar-bot |
-| Restart the bot | sudo systemctl restart discord-google-calendar-bot |
-| View the bot logs, live | sudo journalctl -fu discord-google-calendar-bot |
+| Desired effect          | Command                                            |
+|-------------------------|----------------------------------------------------|
+| Start the bot           | sudo systemctl start discord-google-calendar-bot   |
+| Stop the bot            | sudo systemctl stop discord-google-calendar-bot    |
+| Restart the bot         | sudo systemctl restart discord-google-calendar-bot |
+| Get status of the bot   | sudo systemctl status discord-google-calendar-bot  |
+| View the bot logs, live | sudo journalctl -fu discord-google-calendar-bot    |
 
 To stop the bot and remove it completely from systemd:
 
@@ -116,12 +117,13 @@ NOTE: Be * extremely * careful when running any command with "rm -rf" in it. Mak
 
 ## Docker
 
-| Desired effect | Command |
-|---|---|
-| Start the bot | docker start discord_google_calendar_bot |
-| Stop the bot | docker stop discord_google_calendar_bot |
-| Restart the bot | docker restart discord_google_calendar_bot |
-| View the bot logs, live | docker logs discord_google_calendar_bot -f |
+| Desired effect          | Command                                       |
+|-------------------------|-----------------------------------------------|
+| Start the bot           | docker start discord_google_calendar_bot      |
+| Stop the bot            | docker stop discord_google_calendar_bot       |
+| Restart the bot         | docker restart discord_google_calendar_bot    |
+| Get status of the bot   | docker ps \| grep discord_google_calendar_bot |
+| View the bot logs, live | docker logs discord_google_calendar_bot -f    |
 
 To stop the running bot and remove all traces of it from Docker:
 
