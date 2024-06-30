@@ -32,7 +32,7 @@ Usage:
 
 You need to run this on a Debian-based Linux server, like Ubuntu. If you want to run it as a Docker container, you need to install [Docker Engine (Docker CE)](https://docs.docker.com/engine/install/ubuntu/) first.
 
-# Installation
+# Installation/Upgrade
 
 ## Create a Discord Bot Account
 
@@ -67,13 +67,25 @@ You need to run this on a Debian-based Linux server, like Ubuntu. If you want to
 
 NOTE: Make * sure * you either copy/paste the key names as they are or type them in UPPER CASE
 
-## Bot Deployment
+## Bot Deployment/Upgrade
 
-Clone the bot from this repo, go into the downloaded folder, and run the initial `setup.sh` script:
+If you're doing an initial installation:
 
 ```bash
 git clone https://github.com/null404org/discord_google_calendar_bot.git
 cd discord_google_calendar_bot
+```
+
+If you're doing an upgrade:
+
+```bash
+cd discord_google_calendar_bot
+git pull
+```
+
+Run the initial setup script. This prepares the needed Python virtual environment that allows the bot to use its own Python interpreter and Python dependencies, completely aside from whatever Python stuff you've installed at the user or system level:
+
+```
 /bin/bash setup.sh
 ```
 
@@ -95,12 +107,13 @@ Run this bot as a Docker container:
 
 ## Systemd
 
-| Desired effect | Command |
-|---|---|
-| Start the bot | sudo systemctl start discord-google-calendar-bot |
-| Stop the bot | sudo systemctl stop discord-google-calendar-bot |
-| Restart the bot | sudo systemctl restart discord-google-calendar-bot |
-| View the bot logs, live | sudo journalctl -fu discord-google-calendar-bot |
+| Desired effect          | Command                                            |
+|-------------------------|----------------------------------------------------|
+| Start the bot           | sudo systemctl start discord-google-calendar-bot   |
+| Stop the bot            | sudo systemctl stop discord-google-calendar-bot    |
+| Restart the bot         | sudo systemctl restart discord-google-calendar-bot |
+| Get status of the bot   | sudo systemctl status discord-google-calendar-bot  |
+| View the bot logs, live | sudo journalctl -fu discord-google-calendar-bot    |
 
 To stop the bot and remove it completely from systemd:
 
@@ -116,12 +129,13 @@ NOTE: Be * extremely * careful when running any command with "rm -rf" in it. Mak
 
 ## Docker
 
-| Desired effect | Command |
-|---|---|
-| Start the bot | docker start discord_google_calendar_bot |
-| Stop the bot | docker stop discord_google_calendar_bot |
-| Restart the bot | docker restart discord_google_calendar_bot |
-| View the bot logs, live | docker logs discord_google_calendar_bot -f |
+| Desired effect          | Command                                       |
+|-------------------------|-----------------------------------------------|
+| Start the bot           | docker start discord_google_calendar_bot      |
+| Stop the bot            | docker stop discord_google_calendar_bot       |
+| Restart the bot         | docker restart discord_google_calendar_bot    |
+| Get status of the bot   | docker ps \| grep discord_google_calendar_bot |
+| View the bot logs, live | docker logs discord_google_calendar_bot -f    |
 
 To stop the running bot and remove all traces of it from Docker:
 
