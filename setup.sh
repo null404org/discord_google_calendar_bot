@@ -24,10 +24,10 @@ install_if_not_exists python$PYTHON_VERSION
 install_if_not_exists python${PYTHON_VERSION}-venv
 install_if_not_exists python3-pip
 
-#
+# Wipe out the old virtual environment
 [ -d .venv ] && rm -rf .venv
 
-# Create a virtual environment using the specified Python version
+# Create a new virtual environment using the specified Python version
 python$PYTHON_VERSION -m venv .venv
 
 # Activate the virtual environment
