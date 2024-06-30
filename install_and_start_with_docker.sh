@@ -31,7 +31,7 @@ if docker inspect --format '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null | 
   docker restart $CONTAINER_NAME
 else
   printf "Starting $CONTAINER_NAME as a Docker container: "
-  docker run --name="$CONTAINER_NAME" \
+  docker run --name="$CONTAINER_NAME" --restart always \
     --env-file=$HOME/.aws/docker_env.conf -d $CONTAINER_NAME
 fi
 
