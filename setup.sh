@@ -1,7 +1,7 @@
 #!/bin/bash
 # Exit immediately if a command exits with a non-zero status
 set -e
-
+# s1nack was here
 # Specify the Python version
 PYTHON_VERSION=3.12
 
