@@ -45,7 +45,7 @@ You need to run this on a Debian-based Linux server, like Ubuntu. If you want to
 1. Follow these [Google API Service Account creation/setup instructions](https://medium.com/iceapple-tech-talks/integration-with-google-calendar-api-using-service-account-1471e6e102c8)
 2. When following this procedure, make sure to skip everything after and including the "Enable Domain-wide delegation" part, as that is not needed to make this work. The one exception is that you do need to do the "Add Key in the Service Account", as this is where you get the actual API key JSON block
 3. The "New Project" button is hidden the project selector drop down menu
-4. Name the project: discord-google-calendar-bot
+4. Name the project: discord_google_calendar_bot
 5. When enabling the Google Calendar API, go to Quick Access > APIs & Services > Filter > Google Calendar > Select "Google Calendar API" > Enable API
 6. To get to "IAM & Admin" section, select the link for your newly created service account in the "Credentials" section
 7. Make sure you save the service account email addresss (This is a fake email address used when sharing a calendar with the service account)
@@ -56,7 +56,7 @@ You need to run this on a Debian-based Linux server, like Ubuntu. If you want to
 ## AWS Secrets Setup
 
 1. Either log into your existing AWS account or create a free-tier AWS account
-2. Go to "Secrets Manager" and create a secret called "discord-google-calendar-bot"
+2. Go to "Secrets Manager" and create a secret called "discord_google_calendar_bot"
 3. Create three key-value secret pairs as follows:
 
 | Key | Value description |
@@ -109,19 +109,19 @@ Run this bot as a Docker container:
 
 | Desired effect          | Command                                            |
 |-------------------------|----------------------------------------------------|
-| Start the bot           | sudo systemctl start discord-google-calendar-bot   |
-| Stop the bot            | sudo systemctl stop discord-google-calendar-bot    |
-| Restart the bot         | sudo systemctl restart discord-google-calendar-bot |
-| Get status of the bot   | sudo systemctl status discord-google-calendar-bot  |
-| View the bot logs, live | sudo journalctl -fu discord-google-calendar-bot    |
+| Start the bot           | sudo systemctl start discord_google_calendar_bot   |
+| Stop the bot            | sudo systemctl stop discord_google_calendar_bot    |
+| Restart the bot         | sudo systemctl restart discord_google_calendar_bot |
+| Get status of the bot   | sudo systemctl status discord_google_calendar_bot  |
+| View the bot logs, live | sudo journalctl -fu discord_google_calendar_bot    |
 
 To stop the bot and remove it completely from systemd:
 
 ```
-sudo systemctl stop discord-google-calendar-bot
-sudo systemctl disable discord-google-calendar-bot
+sudo systemctl stop discord_google_calendar_bot
+sudo systemctl disable discord_google_calendar_bot
 sudo rm -rf /opt/discord_google_calendar_bot
-sudo rm /etc/systemd/system/discord-google-calendar-bot.service
+sudo rm /etc/systemd/system/discord_google_calendar_bot.service
 sudo userdel -r discord_google_calendar_bot
 ```
 
