@@ -6,7 +6,7 @@
 # "Use of deprecated module audioop"
 # https://github.com/Rapptz/discord.py/issues/9477
 #
-FROM python:3.12
+FROM python:3.13.0b2-slim
 
 # Set the working directory inside the container
 WORKDIR /app
