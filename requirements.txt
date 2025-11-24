@@ -3,5 +3,5 @@ discord.py
 google
 google-api-python-client
 requests
-aiohttp>=3.10.11 # not directly required, pinned by Snyk to avoid a vulnerability
+aiohttp>=3.12.14 # not directly required, pinned by Snyk to avoid a vulnerability
 zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
