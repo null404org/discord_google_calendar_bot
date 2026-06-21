@@ -14,14 +14,14 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the Python script into the container
+# Copy lock files first for layer caching
+COPY pyproject.toml uv.lock /app/
+
+# Install production dependencies (SHA-locked)
+RUN uv sync --frozen --no-dev --no-install-project
+
+# Copy the application
 COPY discord_google_calendar_bot.py /app/
 
-# Copy the Python script into the container
-COPY requirements.txt /app/
-
-# Install version-pinned dependencies
-RUN uv pip install --system -r requirements.txt
-
 # Run the Python script continuously
-CMD ["python", "discord_google_calendar_bot.py"]
+CMD ["uv", "run", "python", "discord_google_calendar_bot.py"]

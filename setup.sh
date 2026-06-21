@@ -45,14 +45,7 @@ fi
 # Wipe out the old virtual environment
 [ -d .venv ] && rm -rf .venv
 
-# Create a new virtual environment using the specified Python version
-uv venv .venv --python "$PYTHON_VERSION"
-
-# Install required Python packages
-if [ -f requirements-dev.txt ]; then
-  uv pip install --python .venv/bin/python -r requirements-dev.txt
-else
-  uv pip install --python .venv/bin/python -r requirements.txt
-fi
+# Install dependencies from the SHA-locked lockfile
+uv sync --python "$PYTHON_VERSION" --frozen
 
 echo "Setup completed successfully."

@@ -1,5 +1,0 @@
--r requirements.txt
-pytest-cov
-pre-commit>=4.6.0
-pytest
-zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
