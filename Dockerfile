@@ -6,7 +6,7 @@
 # "Use of deprecated module audioop"
 # https://github.com/Rapptz/discord.py/issues/9477
 #
-FROM python:3.13.0b2-slim
+FROM python:3.12-slim
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -17,11 +17,15 @@ WORKDIR /app
 # Copy lock files first for layer caching
 COPY pyproject.toml uv.lock /app/
 
-# Install production dependencies (SHA-locked)
-RUN uv sync --frozen --no-dev --no-install-project
+# Install all dependencies including dev (pytest required for startup tests)
+RUN uv sync --frozen --no-install-project
 
-# Copy the application
-COPY discord_google_calendar_bot.py /app/
+# Copy the application, tests, and entrypoint
+COPY discord_google_calendar_bot.py test_discord_google_calendar_bot.py entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
 
-# Run the Python script continuously
-CMD ["uv", "run", "python", "discord_google_calendar_bot.py"]
+# Mark healthy once startup tests pass (written by entrypoint.sh)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD test -f /tmp/healthy || exit 1
+
+ENTRYPOINT ["/app/entrypoint.sh"]
