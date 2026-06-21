@@ -128,11 +128,12 @@ def get_scheduled_event_recurrence_rule(guild_id, event_id):
     try:
         response = requests.get(url, headers=headers, timeout=60)
         response.raise_for_status()
-        # Process the response
     except requests.exceptions.Timeout:
         print("The request timed out after 60 seconds.")
+        return None  # or raise a custom exception
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
+        return None  # or raise a custom exception
 
     event_data = response.json()
 
