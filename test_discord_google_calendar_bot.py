@@ -73,7 +73,7 @@ def _make_http_error(status_code: int) -> HttpError:
     resp = MagicMock()
     resp.reason = "Error"
     resp.status = status_code               # HttpError.status_code returns resp.status as-is
-    resp.__getitem__ = lambda _, k: str(status_code)
+    resp.__getitem__ = lambda _, k: str(status_code) if k == "status" else None
     return HttpError(resp=resp, content=b"error")
 
 
