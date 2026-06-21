@@ -5,8 +5,8 @@
 #   2. Build local images:
 #        docker build -t local/detect-secrets:latest .docker/detect-secrets/
 #        docker build -t local/bandit:latest .docker/bandit/
-#   3. Generate the secrets baseline:
-#        docker run --rm -v "$(pwd):$(pwd)" -w "$(pwd)" local/detect-secrets:latest scan > .secrets.baseline
+#   3. Generate the secrets baseline (--all-files bypasses git discovery):
+#        docker run --rm -v "$(pwd):$(pwd)" -w "$(pwd)" local/detect-secrets:latest scan --all-files > .secrets.baseline
 #        git add .secrets.baseline
 #   4. pre-commit install
 #
@@ -17,14 +17,16 @@ default_stages: [pre-commit]
 repos:
   # ---------------------------------------------------------------------------
   # TruffleHog — verified secret detection
-  # Scans git history since HEAD; only fails on verified (confirmed) secrets.
+  # Uses filesystem mode (not git mode) so it works inside Docker where the
+  # worktree .git pointer cannot be resolved. --no-update suppresses the
+  # self-updater which fails on a read-only container filesystem.
   # ---------------------------------------------------------------------------
   - repo: local
     hooks:
       - id: trufflehog
         name: TruffleHog
         language: docker_image
-        entry: trufflesecurity/trufflehog:latest git file://. --since-commit HEAD --only-verified --fail
+        entry: trufflesecurity/trufflehog:latest filesystem . --only-verified --fail --no-update
         pass_filenames: false
 
   # ---------------------------------------------------------------------------
@@ -36,21 +38,25 @@ repos:
       - id: trivy
         name: Trivy
         language: docker_image
-        entry: aquasec/trivy:latest filesystem --exit-code 1 --severity HIGH,CRITICAL --no-progress .
+        entry: aquasec/trivy:latest filesystem --cache-dir /tmp/trivy-cache --exit-code 1 --severity HIGH,CRITICAL --no-progress .
         pass_filenames: false
 
   # ---------------------------------------------------------------------------
   # detect-secrets — baseline-driven secret scanning
-  # Requires .secrets.baseline (generated in first-time setup above).
-  # Uses a local image built from .docker/detect-secrets/Dockerfile.
+  # Uses detect-secrets-hook (not detect-secrets scan) so staged files are
+  # checked against the baseline without modifying it. To update the baseline
+  # after a legitimate secret is added, run:
+  #   docker run --rm -v "$(pwd):$(pwd)" -w "$(pwd)" \
+  #     --entrypoint detect-secrets local/detect-secrets:latest \
+  #     scan --all-files > .secrets.baseline
   # ---------------------------------------------------------------------------
   - repo: local
     hooks:
       - id: detect-secrets
         name: detect-secrets
         language: docker_image
-        entry: local/detect-secrets:latest scan --baseline .secrets.baseline
-        pass_filenames: false
+        entry: local/detect-secrets:latest --baseline .secrets.baseline # pragma: allowlist secret
+        pass_filenames: true
 
   # ---------------------------------------------------------------------------
   # ruff format — black-compatible Python formatter

@@ -39,7 +39,7 @@ Author:
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import boto3
 import discord
@@ -193,9 +193,7 @@ def create_google_event(discord_event):
 
     guild_id = discord_event.guild_id
     event_id = discord_event.id
-    recurrence_rule = get_scheduled_event_recurrence_rule(
-        guild_id, event_id
-    )
+    recurrence_rule = get_scheduled_event_recurrence_rule(guild_id, event_id)
     recurrence = None
     if recurrence_rule is not None:
         interval = recurrence_rule["interval"]
@@ -210,10 +208,9 @@ def create_google_event(discord_event):
         elif recurrence_rule["frequency"] == 0:
             recurrence = [
                 f"RRULE:FREQ=YEARLY;"
-                f"BYMONTH={recurrence_rule["by_month"]};"
-                f"BYMONTHDAY={recurrence_rule["by_month_day"]}"
+                f"BYMONTH={recurrence_rule['by_month']};"
+                f"BYMONTHDAY={recurrence_rule['by_month_day']}"
             ]
-
 
     google_event_details = {
         "id": str(discord_event.id),
@@ -277,9 +274,7 @@ def update_google_event(old_discord_event, new_discord_event):
 
     guild_id = new_discord_event.guild_id
     event_id = new_discord_event.id
-    recurrence_rule = get_scheduled_event_recurrence_rule(
-        guild_id, event_id
-    )
+    recurrence_rule = get_scheduled_event_recurrence_rule(guild_id, event_id)
     recurrence = None
     if recurrence_rule is not None:
         interval = recurrence_rule["interval"]
@@ -294,8 +289,8 @@ def update_google_event(old_discord_event, new_discord_event):
         elif recurrence_rule["frequency"] == 0:
             recurrence = [
                 f"RRULE:FREQ=YEARLY;"
-                f"BYMONTH={recurrence_rule["by_month"]};"
-                f"BYMONTHDAY={recurrence_rule["by_month_day"]}"
+                f"BYMONTH={recurrence_rule['by_month']};"
+                f"BYMONTHDAY={recurrence_rule['by_month_day']}"
             ]
 
     google_event_details = {
@@ -358,7 +353,7 @@ async def on_ready():
     discord_scheduled_events = discord_guild.scheduled_events
 
     # Get the date and time as UTC
-    now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + "Z"
+    now = datetime.now(UTC).replace(tzinfo=None).isoformat() + "Z"
     google_events_result = (
         google_client.events()
         .list(
