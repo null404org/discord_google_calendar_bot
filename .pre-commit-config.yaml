@@ -1,0 +1,91 @@
+# All hooks run in Docker — no local Python toolchain required beyond pre-commit itself.
+#
+# First-time setup:
+#   1. pip install pre-commit
+#   2. Build local images:
+#        docker build -t local/detect-secrets:latest .docker/detect-secrets/
+#        docker build -t local/bandit:latest .docker/bandit/
+#   3. Generate the secrets baseline:
+#        docker run --rm -v "$(pwd):$(pwd)" -w "$(pwd)" local/detect-secrets:latest scan > .secrets.baseline
+#        git add .secrets.baseline
+#   4. pre-commit install
+#
+# Run manually: pre-commit run --all-files
+
+default_stages: [pre-commit]
+
+repos:
+  # ---------------------------------------------------------------------------
+  # TruffleHog — verified secret detection
+  # Scans git history since HEAD; only fails on verified (confirmed) secrets.
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        language: docker_image
+        entry: trufflesecurity/trufflehog:latest git file://. --since-commit HEAD --only-verified --fail
+        pass_filenames: false
+
+  # ---------------------------------------------------------------------------
+  # Trivy — filesystem vulnerability scan (HIGH and CRITICAL severity only)
+  # Scans requirements.txt for known CVEs and checks for secrets/misconfigs.
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: trivy
+        name: Trivy
+        language: docker_image
+        entry: aquasec/trivy:latest filesystem --exit-code 1 --severity HIGH,CRITICAL --no-progress .
+        pass_filenames: false
+
+  # ---------------------------------------------------------------------------
+  # detect-secrets — baseline-driven secret scanning
+  # Requires .secrets.baseline (generated in first-time setup above).
+  # Uses a local image built from .docker/detect-secrets/Dockerfile.
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: detect-secrets
+        name: detect-secrets
+        language: docker_image
+        entry: local/detect-secrets:latest scan --baseline .secrets.baseline
+        pass_filenames: false
+
+  # ---------------------------------------------------------------------------
+  # ruff format — black-compatible Python formatter
+  # Image entrypoint is `ruff`, so `entry` provides subcommand + args only.
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format
+        language: docker_image
+        entry: ghcr.io/astral-sh/ruff:latest format
+        types_or: [python, pyi]
+
+  # ---------------------------------------------------------------------------
+  # ruff check — Python linter with autofix
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        language: docker_image
+        entry: ghcr.io/astral-sh/ruff:latest check --fix
+        types_or: [python, pyi]
+
+  # ---------------------------------------------------------------------------
+  # bandit — Python security static analysis
+  # Uses a local image (built from .docker/bandit/Dockerfile) with a known
+  # ENTRYPOINT ["bandit"] so args are unambiguous.
+  # Scans only the application file; test file excluded (mock secrets cause
+  # false positives on B105/B106/B107). Config read from pyproject.toml.
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: bandit
+        name: bandit
+        language: docker_image
+        entry: local/bandit:latest -c pyproject.toml discord_google_calendar_bot.py
+        pass_filenames: false
