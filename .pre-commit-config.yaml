@@ -95,3 +95,16 @@ repos:
         language: docker_image
         entry: local/bandit:latest -c pyproject.toml discord_google_calendar_bot.py
         pass_filenames: false
+
+  # ---------------------------------------------------------------------------
+  # pytest — run the full test suite before committing
+  # Runs via uv so it uses the project's managed virtual environment.
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        language: system
+        entry: uv run pytest
+        pass_filenames: false
+        always_run: true
