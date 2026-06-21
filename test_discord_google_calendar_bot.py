@@ -190,17 +190,15 @@ class TestGetScheduledEventRecurrenceRule(unittest.TestCase):
         self.assertEqual(result["frequency"], 3)
         self.assertEqual(result["interval"], 1)
 
-    def test_timeout_exception_propagates_as_unbound_local(self):
-        # The current code catches the exception but then reads `response` which
-        # was never assigned — the resulting UnboundLocalError is the real behaviour.
+    def test_timeout_exception_returns_none(self):
         with patch("requests.get", side_effect=requests.exceptions.Timeout()):
-            with self.assertRaises(UnboundLocalError):
-                bot.get_scheduled_event_recurrence_rule(111, 222)
+            result = bot.get_scheduled_event_recurrence_rule(111, 222)
+        self.assertIsNone(result)
 
-    def test_request_exception_propagates_as_unbound_local(self):
+    def test_request_exception_returns_none(self):
         with patch("requests.get", side_effect=requests.exceptions.RequestException("oops")):
-            with self.assertRaises(UnboundLocalError):
-                bot.get_scheduled_event_recurrence_rule(111, 222)
+            result = bot.get_scheduled_event_recurrence_rule(111, 222)
+        self.assertIsNone(result)
 
 
 # ---------------------------------------------------------------------------
